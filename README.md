@@ -1,7 +1,7 @@
 Fake user data
 ==============
 
-Contains files with random users. 
+The "RandumUsers" directory contains files with random users. 
 
     {
       "name": {
@@ -38,31 +38,22 @@ In order to import these users, use:
 where XXX is 100, 1000, 10000, 100000, 200000, 300000.
 
 
-Count the number of users called Diedre
----------------------------------------
+IP Address Ranges
+=================
 
-    let clinton = (for u in users filter u.name.first == "Diedre" return 1)
-    return length(clinton)
+The IPRanges directory contains IP address ranges and geo information.
 
-You might want to add an index using the shell
-
-    db.users.ensureHashIndex("name.first");
-
-
-Last names of users called Diedre
----------------------------------
-
-  for u in users filter u.name.first == "Diedre" return u.name.last
-
-You might want to add an index using the shell
-
-    db.users.ensureHashIndex("name.first");
+    {
+      "locId" : "17",
+      "endIpNum" : "16777471",
+      "startIpNum" : "16777216", 
+      "geo" : [ -27, 133 ] 
+    }
 
 
-Find out how many users live in each city
------------------------------------------
+Importing the data
+------------------
 
-    for u in users
-      collect city = u.contact.address.city into g
-      return { "city" : city, "users" : length(g) }
+In order to import these locations, use:
 
+    ./arangoimp --file geoblocks.json --collection=ip_ranges --create-collection=true --type=json
