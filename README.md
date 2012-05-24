@@ -62,11 +62,37 @@ In order to import these countries, use
     ./arangoimp --file countries.csv --collection=countries --create-collection=true --type=csv
 
 
+Regions
+=======
+
+There are roughly 4100 regions with wikipedia links.
+
+    "id","code","local_code","name","continent","iso_country","wikipedia_link","keywords"
+    1,"AD-02",02,"Canillo","EU","AD","http://en.wikipedia.org/wiki/Canillo",
+
+In order to import these regions, use
+
+    ./arangoimp --file regions.csv --collection=regions --create-collection=true --type=csv
+
+
+McDonalds
+=========
+
+There are roughly 1200 geo coordinates for McDonalds in France.
+
+    lat,long
+    42.524330,2.833970
+
+In order to import these, use
+
+    ./arangoimp --file france.csv --collection=mcdonalds --create-collection=true --type=csv
+
+
 Bezirke
 =======
 
-The Bezirke directory contains a list of German counties with wikipedia
-links. There are 169431 Bezirke.
+The Bezirke directory contains a list of German counties with geo
+information. There are 169431 Bezirke.
 
     RC,UFI,UNI,LAT,LONG,DMS_LAT,DMS_LONG,MGRS,JOG,FC,DSG,PC,CC1,ADM1,POP,ELEV,CC2,NT,LC,SHORT_FORM,GENERIC,SORT_NAME_RO,FULL_NAME_RO,FULL_NAME_ND_RO,SORT_NAME_RG,FULL_NAME_RG,FULL_NAME_ND_RG,NOTE,MODIFY_DATE
     1,6132652,6143433,52.5,13.283333,523000,131700,33UUU8347218037,NN33-10,A,ADM2,,GM,16,,,,N,,Charlottenburg-Wilmersdorf,Bezirk,BEZIRKCHARLOTTENBURGWILMERSDORF,Bezirk Charlottenburg-Wilmersdorf,Bezirk Charlottenburg-Wilmersdorf,CHARLOTTENBURGWILMERSDORF BEZIRK,"Charlottenburg-Wilmersdorf, Bezirk","Charlottenburg-Wilmersdorf, Bezirk",,2001-12-20
