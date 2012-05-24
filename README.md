@@ -34,6 +34,20 @@ In order to import these users, use:
 where XXX is 100, 1000, 10000, 100000, 200000, 300000.
 
 
+Cities
+======
+
+The Cities directory contains a list of cities with geo
+information. There are roughly 320000 cities.
+
+    locId,country,region,city,postalCode,latitude,longitude,metroCode,areaCode
+    1,"O1","","","",0.0000,0.0000,,
+
+In order to import these cities, use
+
+    ./arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
+
+
 Airports
 ========
 
