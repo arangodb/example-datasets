@@ -48,6 +48,20 @@ In order to import these cities, use
     ./arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
 
 
+Countries
+=========
+
+The Countries directory contains a list of contries with wikipedia
+links. There are 241 contries.
+
+    "id","code","name","continent","wikipedia_link","keywords"
+    1,"AD","Andorra","EU","http://en.wikipedia.org/wiki/Andorra",
+
+In order to import these countries, use
+
+    ./arangoimp --file countries.csv --collection=contries --create-collection=true --type=csv
+
+
 Airports
 ========
 
