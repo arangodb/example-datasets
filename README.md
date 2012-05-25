@@ -116,6 +116,18 @@ In order to import these airports, use
     ./arangoimp --file airports.csv --collection=airports --create-collection=true --type=csv
 
 
+wikiimporter
+============
+
+wikiimporter is a converter for Wikipedia dumps written by Sebastian
+Cohnen in Ruby, see https://github.com/tisba/wikiimporter. Downloading
+the wikipedia dump will take some time - it is roughly 2.5 GByte.
+
+    cd wikiimporter
+    sudo bundle install
+    curl `./bin/getlatestdumpurl.rb` -o data/wiki.xml.bz2 
+
+
 IP Address Ranges
 =================
 

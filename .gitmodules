@@ -1,0 +1,3 @@
+[submodule "wikiimporter"]
+	path = wikiimporter
+	url = https://github.com/tisba/wikiimporter.git
