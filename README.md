@@ -29,7 +29,7 @@ The "RandumUsers" directory contains files with random users.
 
 In order to import these users, use:
 
-    ./arangoimp --file names_XXX.json --collection=users --create-collection=true --type=json
+    arangoimp --file names_XXX.json --collection=users --create-collection=true --type=json
 
 where XXX is 100, 1000, 10000, 100000, 200000, 300000.
 
@@ -45,7 +45,7 @@ information. There are roughly 320000 cities.
 
 In order to import these cities, use
 
-    ./arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
+    arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
 
 
 Countries
@@ -59,7 +59,7 @@ links. There are 241 contries.
 
 In order to import these countries, use
 
-    ./arangoimp --file countries.csv --collection=countries --create-collection=true --type=csv
+    arangoimp --file countries.csv --collection=countries --create-collection=true --type=csv
 
 
 Regions
@@ -72,7 +72,7 @@ There are roughly 4100 regions with wikipedia links.
 
 In order to import these regions, use
 
-    ./arangoimp --file regions.csv --collection=regions --create-collection=true --type=csv
+    arangoimp --file regions.csv --collection=regions --create-collection=true --type=csv
 
 
 McDonalds
@@ -85,7 +85,7 @@ There are roughly 1200 geo coordinates for McDonalds in France.
 
 In order to import these, use
 
-    ./arangoimp --file france.csv --collection=mcdonalds --create-collection=true --type=csv
+    arangoimp --file france.csv --collection=mcdonalds --create-collection=true --type=csv
 
 
 Bezirke
@@ -99,7 +99,7 @@ information. There are 169431 Bezirke.
 
 In order to import these counties, use
 
-    ./arangoimp --file bezirke.csv --collection=bezirke --create-collection=true --type=csv
+    arangoimp --file bezirke.csv --collection=bezirke --create-collection=true --type=csv
 
 
 Airports
@@ -113,7 +113,7 @@ information. There are roughly 44000 airports.
 
 In order to import these airports, use
 
-    ./arangoimp --file airports.csv --collection=airports --create-collection=true --type=csv
+    arangoimp --file airports.csv --collection=airports --create-collection=true --type=csv
 
 
 wikiimporter
@@ -126,6 +126,20 @@ the wikipedia dump will take some time - it is roughly 2.5 GByte.
     cd wikiimporter
     sudo bundle install
     curl `./bin/getlatestdumpurl.rb` -o data/wiki.xml.bz2 
+
+
+NerdPursuit
+===========
+
+See https://github.com/Nerds/NerdPursuit for details. Each question is
+stored in its own file. So, you must create a file with all questions
+first:
+
+    ./nerd_pursuit_compress.sh
+
+and then import the generated file using
+
+    arangoimp --file nerd_pursuit_compressed.json --collection=nerds --create-collection=true --type=json
 
 
 IP Address Ranges
@@ -143,4 +157,4 @@ information. There are 3.7 Million ranges.
 
 In order to import these locations, use:
 
-    ./arangoimp --file geoblocks.json --collection=ip_ranges --create-collection=true --type=json
+    arangoimp --file geoblocks.json --collection=ip_ranges --create-collection=true --type=json

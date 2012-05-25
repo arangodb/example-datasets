@@ -83,3 +83,11 @@ $ARANGOIMP --file Airports/airports.csv --collection=airports --create-collectio
 (echo 'db.users.ensureHashIndex("name");' | $ARANGOSH -s) || exit 1
 echo
 echo
+
+echo "Importing NerdPursuit into 'nerds'"
+echo "=================================="
+(echo 'db._drop("nerds");' | $ARANGOSH -s) || exit 1
+./nerd_pursuit_compress.sh
+$ARANGOIMP --file nerd_pursuit_compressed.json --collection=nerds --create-collection=true --type=json || exit 1
+echo
+echo
