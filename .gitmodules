@@ -2,5 +2,5 @@
 	path = wikiimporter
 	url = https://github.com/tisba/wikiimporter.git
 [submodule "NerdPursuit"]
-	path = NerdPursuit
+	path = NerdPursuit/NerdPursuit
 	url = https://github.com/Nerds/NerdPursuit.git
