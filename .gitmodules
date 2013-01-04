@@ -1,6 +1,6 @@
 [submodule "wikiimporter"]
 	path = wikiimporter
 	url = https://github.com/tisba/wikiimporter.git
-[submodule "NerdPursuit"]
+[submodule "NerdPursuit/NerdPursuit"]
 	path = NerdPursuit/NerdPursuit
 	url = https://github.com/Nerds/NerdPursuit.git
