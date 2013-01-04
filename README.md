@@ -158,3 +158,17 @@ information. There are 3.7 Million ranges.
 In order to import these locations, use:
 
     arangoimp --file geoblocks.json --collection=ip_ranges --create-collection=true --type=json
+
+
+The DBLP Computer Science Bibliography
+======================================
+
+Download the data
+
+    ./dblp-download.sh
+
+this will create an XML file dblp.xml (roughly 1.1 GByte).
+
+    python dblp2json.py dblp.xml > dblp.json
+
+converts the file to json
