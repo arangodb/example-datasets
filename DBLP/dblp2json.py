@@ -111,8 +111,10 @@ list_tags = [
 
 flatten_tags = [
     "booktitle",
+    "ee",
     "isbn",
     "publisher",
+    "url",
     "year",
     ]
 
