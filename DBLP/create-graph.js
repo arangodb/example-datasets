@@ -2,13 +2,11 @@
 /*global require, arango, db, edges, Module */
 
 var arangodb = require("org/arangodb");
-var console = require("console");
 var printf = require("internal").printf;
 
 function main (argv) {
   var addBook;
   var addPerson;
-  var argc = argv.length;
   var edg;
   var inc;
   var iterator;
@@ -18,7 +16,7 @@ function main (argv) {
   var out;
   var peopleAttributes;
 
-  if (argc !== 4) {
+  if (argv.length !== 4) {
     printf("usage: create-persons <dblp> <graph> <relation>\n");
     return;
   }
