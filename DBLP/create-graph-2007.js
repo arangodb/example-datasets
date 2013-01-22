@@ -108,7 +108,7 @@ function main (argv) {
   };
 
   filterYear = function(year) {
-    return true;
+    return year === 2007;
   };
 
   iterator = function (d, pos) {

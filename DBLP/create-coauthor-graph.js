@@ -4,12 +4,25 @@
 var arangodb = require("org/arangodb");
 var printf = require("internal").printf;
 
-function main (argv) {
+function main () {
+  var argv;
   var coauthor;
   var cursor;
   var edges;
-  var vertices;
+  var i;
   var noPersons;
+  var vertices;
+
+  if (arguments.length === 1) {
+    argv = arguments[0];
+  }
+  else {
+    argv = ["main"];
+
+    for (i = 0;  i < arguments.length;  ++i) {
+      argv.push(arguments[i]);
+    }
+  }
 
   if (argv.length !== 4) {
     printf("usage: create-persons <dblp-vertices> <dblp-edges> <coauthor-edges>\n");
@@ -52,6 +65,7 @@ function main (argv) {
     var n;
     var start = cursor.next();
     var total;
+    var year;
 
     if (start.type !== "person") {
       continue;
@@ -60,27 +74,37 @@ function main (argv) {
     e = edges.inEdges(start._id);
 
     count = {};
+    year = 0;
 
     for (i = 0;  i < e.length;  ++i) {
       n = e[i];
 
       if (start._id !== n._from && n['$label'] === "author") {
-	f = edges.outEdges(n._from);
+        f = edges.outEdges(n._from);
 
-	for (j = 0;  j < f.length;  ++j) {
-	  m = f[j];
+        for (j = 0;  j < f.length;  ++j) {
+          m = f[j];
 
-	  if (start._id < m._to && m['$label'] === "author") {
-	    var id = m._to;
+          if (start._id < m._to && m['$label'] === "author") {
+            var id = m._to;
+            var y;
 
-	    if (count.hasOwnProperty(id)) {
-	      count[id]++;
+            if (count.hasOwnProperty(id)) {
+              count[id]++;
+            }
+            else {
+              count[id] = 1;
+            }
+
+	    if (m.hasOwnProperty("year")) {
+              y = Number(m.year);
+
+              if (year === 0 || y < year) {
+		year = y;
+              }
 	    }
-	    else {
-	      count[id] = 1;
-	    }
-	  }
-	}
+          }
+        }
       }
     }
 
@@ -88,16 +112,17 @@ function main (argv) {
 
     for (j in count) {
       if (count.hasOwnProperty(j)) {
-	coauthor.save(start._id, j, {
-	  type: 'coauthor',
-	  count: count[j]
-	});
+        coauthor.save(start._id, j, {
+          type: 'coauthor',
+          count: count[j],
+          year: year
+        });
 
-	total += count[j];
+        total += count[j];
       }
     }
 
     noPersons++;
-    printf("%d next %s (total %d)\n", noPersons, start['$id'], total);
+    printf("%d next %s (total %d, year %d)\n", noPersons, start['$id'], total, year);
   }
 }

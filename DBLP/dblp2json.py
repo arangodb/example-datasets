@@ -211,6 +211,9 @@ def end_element(name):
             elif len(article[key]) == 1 and key in flatten_tags:
                 article[key] = article[key][0]
 
+        article['_key'] = article['key']
+        del article['key']
+
         print "%s" % json.dumps(article)
         return
 
