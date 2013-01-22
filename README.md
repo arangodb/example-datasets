@@ -124,9 +124,15 @@ Cohnen in Ruby, see https://github.com/tisba/wikiimporter. Downloading
 the wikipedia dump will take some time - it is roughly 2.5 GByte.
 
     cd wikiimporter
-    sudo bundle install
-    curl `./bin/getlatestdumpurl.rb` -o data/wiki.xml.bz2 
+    mkdir data
+    mkdir log
 
+    sudo bundle install
+
+    curl `./bin/getlatestdumpurl.rb` -o data/wiki.xml.bz2 
+    bzcat data/wiki.xml.bz2 | ./bin/wikixml2json.rb --max-pages 10000 > data/articles.json
+
+    arangoimp --file data/articles.json --collection=wiki --create-collection=true --type=json
 
 NerdPursuit
 ===========
