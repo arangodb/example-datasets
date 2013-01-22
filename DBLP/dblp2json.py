@@ -118,9 +118,33 @@ flatten_tags = [
     "year",
     ]
 
+################################################################################
+### @brief tags which are references and contain keys
+################################################################################
+
+key_tags = [
+    "publisher",
+    "cite",
+    "crossref",
+    ]
+
 ## -----------------------------------------------------------------------------
 ## --SECTION--                                                  global functions
 ## -----------------------------------------------------------------------------
+
+################################################################################
+### @brief normalize key
+################################################################################
+
+def normalize(key):
+    key = key.replace(":", ":3A")
+    key = key.replace("*", ":2A")
+    key = key.replace("+", ":2B")
+    key = key.replace(" ", ":20")
+    key = key.replace("!", ":21")
+    key = key.replace("/","::")
+
+    return key
 
 ################################################################################
 ### @brief start element
@@ -211,8 +235,18 @@ def end_element(name):
             elif len(article[key]) == 1 and key in flatten_tags:
                 article[key] = article[key][0]
 
-        article['_key'] = article['key']
+	article['_key'] = normalize(article['key'])
         del article['key']
+
+        for key in key_tags:
+            if key in article:
+                val = article[key]
+
+                if isinstance(val,str):
+                    article[key] = normalize(val)
+                else:
+                    for k in range(0,len(val)):
+                        article[key][k] = normalize(val[k])
 
         print "%s" % json.dumps(article)
         return
