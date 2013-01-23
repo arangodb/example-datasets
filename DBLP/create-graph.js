@@ -51,7 +51,7 @@ function main (args) {
     out = arangodb.db._createDocumentCollection(argv[2]);
   }
 
-  out.ensureSkiplist("name");
+  out.ensureUniqueConstraint("name");
 
   // check the output collection for relationship
   edg = arangodb.db._collection(argv[3]);

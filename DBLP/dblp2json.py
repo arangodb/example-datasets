@@ -140,8 +140,12 @@ def normalize(key):
     key = key.replace(":", ":3A")
     key = key.replace("*", ":2A")
     key = key.replace("+", ":2B")
+    key = key.replace(".", ":2E")
     key = key.replace(" ", ":20")
     key = key.replace("!", ":21")
+    key = key.replace("{", ":7B")
+    key = key.replace("|", ":7C")
+    key = key.replace("}", ":7D")
     key = key.replace("/","::")
 
     return key

@@ -75,25 +75,30 @@ function main () {
 
     count = {};
     year = 0;
+    books = {};
 
     for (i = 0;  i < e.length;  ++i) {
       n = e[i];
 
-      if (start._id !== n._from && n['$label'] === "author") {
+      // n contains a book or article, check that start is an author
+      if (n['$label'] === "author") {
         f = edges.outEdges(n._from);
 
         for (j = 0;  j < f.length;  ++j) {
           m = f[j];
 
+	  // m contains an author again, only enter one side of the relation
           if (start._id < m._to && m['$label'] === "author") {
             var id = m._to;
             var y;
 
             if (count.hasOwnProperty(id)) {
               count[id]++;
+	      books[id].push(m._from);
             }
             else {
               count[id] = 1;
+	      books[id] = [ m._from ];
             }
 
 	    if (m.hasOwnProperty("year")) {
@@ -113,8 +118,9 @@ function main () {
     for (j in count) {
       if (count.hasOwnProperty(j)) {
         coauthor.save(start._id, j, {
-          type: 'coauthor',
+          '$label': 'coauthor',
           count: count[j],
+          books: books[j],
           year: year
         });
 
@@ -123,6 +129,6 @@ function main () {
     }
 
     noPersons++;
-    printf("%d next %s (total %d, year %d)\n", noPersons, start['$id'], total, year);
+    printf("%d next %s (total %d, year %d)\n", noPersons, start.name, total, year);
   }
 }
