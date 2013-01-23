@@ -25,7 +25,7 @@ function main () {
   }
 
   if (argv.length !== 4) {
-    printf("usage: create-persons <dblp-vertices> <dblp-edges> <coauthor-edges>\n");
+    printf("usage: create-coauthor-graph <dblp-vertices> <dblp-edges> <coauthor-edges>\n");
     return;
   }
 
@@ -87,27 +87,27 @@ function main () {
         for (j = 0;  j < f.length;  ++j) {
           m = f[j];
 
-	  // m contains an author again, only enter one side of the relation
+          // m contains an author again, only enter one side of the relation
           if (start._id < m._to && m['$label'] === "author") {
             var id = m._to;
             var y;
 
             if (count.hasOwnProperty(id)) {
               count[id]++;
-	      books[id].push(m._from);
+              books[id].push(m._from);
             }
             else {
               count[id] = 1;
-	      books[id] = [ m._from ];
+              books[id] = [ m._from ];
             }
 
-	    if (m.hasOwnProperty("year")) {
+            if (m.hasOwnProperty("year")) {
               y = Number(m.year);
 
               if (year === 0 || y < year) {
-		year = y;
+                year = y;
               }
-	    }
+            }
           }
         }
       }

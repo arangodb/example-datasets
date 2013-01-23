@@ -32,7 +32,7 @@ function main (args) {
   }
 
   if (argv.length !== 4) {
-    printf("usage: create-persons <dblp> <graph> <relation>\n");
+    printf("usage: create-graph <dblp> <vertices> <edges>\n");
     return;
   }
 
@@ -205,7 +205,7 @@ function main (args) {
 
   iterator = function (d, pos) {
     var type;
-    var book;
+    var article;
     var proceeding;
     var i;
     var year;
@@ -228,11 +228,12 @@ function main (args) {
       return;
     }
 
-    // find the proceedings
+    // find the article
     try {
-      book = out.document(d._key);
+      article = out.document(d._key);
     }
     catch (err) {
+      printf("cannot find article %s\n", d._key);
       return;
     }
 
@@ -242,14 +243,16 @@ function main (args) {
       try {
         proceeding = out.document(cr);
 
-        if (proceeding.type !== "proceedings") {
-          noProceedings++;
-          printf("%d: %s in %s\n", noProceedings, book.title, proceeding.title);
-          edg.save(book._key, proceeding._key, { '$label': "proceedings" });
-        }
+        noProceedings++;
+        printf("%d: %s in %s\n", noProceedings, article.title, proceeding.title);
+
+        edg.save(article._id, proceeding._id, {
+          '$label': "proceedings", 
+          type: proceeding.type
+        });
       }
       catch (err1) {
-        printf("crossref '%s' failed: %s", cr, String(err1));
+        printf("crossref '%s' failed: %s\n", cr, String(err1));
       }
     }
   };
