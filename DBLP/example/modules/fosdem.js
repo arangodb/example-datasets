@@ -21,6 +21,8 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
   var i;
   var j;
   var links;
+  var mayear;
+  var miyear;
   var newVertices;
   var pos;
   var seen;
@@ -40,6 +42,8 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
   newVertices = [ start ];
   pos = 1;
   d = 0;
+  miyear = 0;
+  mayear = 0;
 
   while (d < depth && 0 < newVertices.length && vertices.length < maxlen) {
     var children = [];
@@ -58,6 +62,7 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
         var peer = edge.getPeerVertex(next);
         var pid = peer.getId();
         var num;
+        var year;
 
         if (seen.hasOwnProperty(pid)) {
           num = seen[pid];
@@ -69,6 +74,18 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
         }
 
         links.push(genEdge(nnum, num, edge));
+
+        year = edge.getProperty("year");
+
+        if (year !== null) {
+          if (miyear === 0 || year < miyear) {
+            miyear = year;
+          }
+
+          if (mayear === 0 || mayear < year) {
+            mayear = year;
+          }
+        }
       }
     }
 
@@ -79,7 +96,9 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
     vertices: vertices.map(genVertex),
     links: links,
     start: genVertex(start),
-    depth: depth
+    depth: depth,
+    minYear: miyear,
+    maxYear: mayear
   };
 }
 
