@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+.label {
+  fill: #777;
+}
+
+.yearlabel {
+  font: 500 196px "Helvetica Neue";
+  fill: #ddd;
+}
+
+.node-cluster {
+  font: 10px sans-serif;
+}
+
+.link-cluster {
+  stroke: steelblue;
+  stroke-opacity: .4;
+  fill: none;
+}
+
+.node-force {
+  stroke: #000; 
+  stroke-width: 1.5px;
+}
+
+.link-force {
+  stroke: steelblue;
+  stroke-opacity: .6;
+}
+
+.button {
+  text-align: center;
+  color: white;
+  background: gray;
+  border-color: black;
+  border-style: solid;
+  border-width: 1px;
+  padding: 2px;
+  width:350px;
+  cursor: pointer;
+  display: inline;
+}  
+#button {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+#force, #cluster {
+  float: right;
+  width: 130px;
+}
+svg {
+  width: 960px;
+  height: 700px;
+}
+svg text, svg circle {
+  cursor: pointer;
+}
+.nav {
+  height: 22px;
+  width: 962px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+div#view {
+  width: 960px;
+  height: 700px;
+  border-color: #aaa;
+  border-style: solid;
+  border-width: 1px;
+}
+</style>
+</head>
+<body>
+  <div class="nav">
+     <div class="button" id="backward"> &lt;&lt; </div>
+     <div class="button" id="next"> +&gt; </div> 
+     <div class="button" id="play"> &gt; </div> 
+     <div class="button" id="forward"> &gt;&gt; </div>
+  </div>
+  <div id="view"></div>
+  <div id="titletext"></div> 
+<script src="jquery-1.5.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<script>
+var config = {
+  width: 960,
+  height: 700,
+  animationSpeed: 1500,
+  maxCount: 100
+};
+
+function CoauthorDiag (config) {
+  var that = this;
+
+  var diameter = 700;
+  var radius = diameter / 2;
+  this.innerRadius = radius - 120;
+
+  this.svg = d3.select("#view")
+    .append("svg")
+    .attr("width", config.width)
+    .attr("height", config.height);
+
+  this.line = d3.svg.line.radial()
+    .interpolate("bundle")
+    .tension(.85)
+    .radius(function(d) { return d.y; })
+    .angle(function(d) { return d.x / 180 * Math.PI; });
+
+  this.svg.attr("width", diameter);
+  this.svg.attr("height", diameter);
+ 
+  this.textGroup = this.svg.append("svg:g");
+  this.clusterGroup = this.svg.append("svg:g")
+    .attr("transform", "translate(" + radius + "," + radius + ")");
+
+  this.maxCount = config.maxCount;
+
+  this.width = config.width;
+  this.height = config.height;
+
+  // das ist das Textlabel für die Jahreszahl
+  this.label = this.textGroup.append("text")
+    .attr("class", "yearlabel")
+    .attr("text-anchor", "end")
+    .attr("y", config.height - 24)
+    .attr("x", config.width);
+}
+
+
+
+CoauthorDiag.prototype.nodeColor = function (node) {
+  return "#000000";
+};
+
+
+
+CoauthorDiag.prototype.loadGraph = function (name) {
+  var that = this;
+  var url = "/fosdem/coauthor.json?depth=3&maxlen=" + config.maxCount;
+
+  if (name) {
+    url += "&start=" + encodeURIComponent(name);
+  }
+
+  d3.json(url, function(graph) {
+    that.setGraph(graph);
+    that.setupNodes();
+    that.addLinks(that.minYear);
+  });
+};
+
+
+
+CoauthorDiag.prototype.updateTitle = function () {
+
+  // die Unterschrift
+  var text = this.graph.start 
+    + " (year: " + this.year 
+    + ", range " + this.minYear + " - " + this.maxYear + ")";
+
+  $("div#titletext").text(text);
+
+  this.label.text(this.year);
+};
+
+
+
+CoauthorDiag.prototype.setGraph = function (graph) {
+  this.graph = graph;
+  this.vertices = graph.vertices;
+  this.links = graph.links;
+  this.minYear = graph.minYear;
+  this.maxYear = graph.maxYear;
+  this.year = 0;
+
+  this.updateTitle();
+};
+
+
+
+CoauthorDiag.prototype.setupNodes = function () {
+  var that = this;
+
+  this.year = 0;
+
+  this.clusterGroup.selectAll("g").remove();
+  this.clusterGroup.selectAll("path").remove();
+
+  this.cluster = d3.layout.cluster()
+    .size([360, that.innerRadius])
+    .sort(null)
+    .value(function(d) { return d.size; });
+
+  this.bundle = d3.layout.bundle();
+
+  // create vertices nodes
+  this.nodeList = [];
+
+  this.vertices.forEach(function (author) {
+    var node = {
+      name: author.name,
+      parent: that.root,
+      children: []
+    };
+	 
+    that.nodeList.push(node);
+  });
+
+  var nodes = this.cluster.nodes({ children: that.nodeList });
+
+  this.node = this.clusterGroup.selectAll("g")
+    .data(nodes)
+    .enter()
+    .append("g")
+    .on("click", function(d) { that.loadGraph(d.name); })
+    .attr("class", "node-cluster")
+    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+    .append("text")
+    .style("fill", function(node) { return that.nodeColor(node); })
+    .attr("dx", function(d) { return d.x < 180 ? 0 : -8; })
+    .attr("dy", ".31em")
+    .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+    .attr("transform", function(d) { return (d.x < 180 ? null : "rotate(180)"); })
+    .text(function(d) { return d.name; });
+};
+
+
+
+CoauthorDiag.prototype.addLinks = function (year) {
+  var that = this;
+
+  var edges = [];
+
+  this.links.forEach(function (link) {
+    if (link.year < year) {
+      edges.push({ source: that.nodeList[link.source], target: that.nodeList[link.target] });
+    }
+  });
+
+  this.year = year;
+
+  this.clusterGroup.selectAll("path").remove();
+
+  this.link = this.clusterGroup.selectAll("path")
+    .data(this.bundle(edges))
+    .enter()
+    .append("path")
+    .attr("class", "link-cluster")
+    .attr("d", that.line);
+
+  this.updateTitle();
+};
+
+
+
+CoauthorDiag.prototype.advanceYear = function () {
+  if (this.year >= this.maxYear) {
+    return;
+  }
+
+  var year = this.year;
+  links = [];
+
+  do {
+    year++;
+
+    links = this.links.filter(function(a) {
+      return a.year === year;
+    });
+  }
+  while (links.length === 0 && year <= this.maxYear);
+
+  this.addLinks(year);
+};
+
+
+
+var app = new CoauthorDiag(config);
+    
+app.loadGraph();
+
+$(document).ready(function () {
+ $("div#forward").click(function (event) {
+   app.addLinks(app.maxYear);
+ });
+});
+
+$(document).ready(function () {
+ $("div#next").click(function (event) {
+   app.advanceYear();
+ });
+});
+
+$(document).ready(function () {
+ $("div#play").click(function (event) {
+   function myLoop () {
+     setTimeout(function() {
+       app.advanceYear();
+
+       if (app.year < app.maxYear) {
+	 myLoop();
+       }
+     }, config.animationSpeed);
+   }
+
+   myLoop();
+ });
+});
+
+$(document).ready(function () {
+ $("div#backward").click(function (event) {
+   app.setupNodes();
+   app.addLinks(app.minYear);
+ });
+});
+</script>
+</body>
+</html>
