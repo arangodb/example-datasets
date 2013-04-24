@@ -3,151 +3,179 @@
 
 var actions = require("org/arangodb/actions");
 var graph = require("org/arangodb/graph");
+var traversal = require("org/arangodb/graph/traversal");
 var console = require("console");
 
 var Graph = graph.Graph;
+var Traverser = traversal.Traverser;
 
 // -----------------------------------------------------------------------------
 // --SECTION--                                                 private functions
 // -----------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
-/// @brief traverses the co-authors graph
+/// @brief coauthor visitor
 ////////////////////////////////////////////////////////////////////////////////
 
-function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
-  var d;
-  var edges;
-  var i;
-  var j;
-  var links;
-  var mayear;
-  var miyear;
-  var newVertices;
-  var pos;
-  var seen;
-  var vertices;
+function coauthorVisitor (maxlen) {
+  return function (config, result, vertex, path) {
+    var name = vertex.name;
+    var len = path.vertices.length;
+    var pos;
 
-  // the list of all vertices collected so far
-  vertices = [ start ];
+    if (result.positions.hasOwnProperty(name)) {
+      pos = result.positions[name];
+    }
+    else {
+      pos = result.vertices.length;
 
-  // hash used to check position and existence
-  seen = {};
-  seen[start.getId()] = 0;
+      if (maxlen <= pos) {
+	return;
+      }
 
-  // coauthor relations
-  links = [];
+      result.positions[name] = pos;
+      result.vertices.push({ name: name, depth: len - 1 });
+    }
 
-  // start with these vertices
-  newVertices = [ start ];
-  pos = 1;
-  d = 0;
-  miyear = 0;
-  mayear = 0;
+    if (1 < len) {
+      var peer = path.vertices[len - 2];
+      var pname = peer.name;
 
-  while (d < depth + 1 && 0 < newVertices.length) {
-    var children = [];
+      if (result.positions.hasOwnProperty(pname)) {
+	var edge = path.edges[len - 2];
+	var ppos = result.positions[pname];
+	var year = edge.year;
 
-    for (i = 0;  i < newVertices.length;  ++i) {
-      var next = newVertices[i];
-      var nnum = seen[next.getId()];
-      var peers;
+	result.links.push({ source: pos, target: ppos, year: year, count: edge.count });
 
-      edges = next.getEdges();
-
-      for (j = 0;  j < edges.length;  ++j) {
-        var edge = edges[j];
-        var peer = edge.getPeerVertex(next);
-        var pid = peer.getId();
-        var num;
-        var year;
-
-        if (seen.hasOwnProperty(pid)) {
-          num = seen[pid];
-        }
-        else {
-	  if (vertices.length < maxlen) {
-            num = seen[pid] = vertices.length;
-            vertices.push(peer);
-            children.push(peer);
-	  }
-        }
-
-	if (num !== undefined) {
-          links.push(genEdge(nnum, num, edge));
+	if (result.minYear === 0 || result.minYear > year) {
+	  result.minYear = year;
 	}
 
-        year = edge.getProperty("year");
-
-        if (year !== null) {
-          if (miyear === 0 || year < miyear) {
-            miyear = year;
-          }
-
-          if (mayear === 0 || mayear < year) {
-            mayear = year;
-          }
-        }
+	if (result.maxYear === 0 || result.maxYear < year) {
+	  result.maxYear = year;
+	}
       }
     }
-
-    if (d < depth) {
-      newVertices = children;
-    }
-
-    d++;
-  }
-
-  return {
-    vertices: vertices.map(genVertex),
-    links: links,
-    start: genVertex(start),
-    depth: depth,
-    minYear: miyear,
-    maxYear: mayear
   };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// @brief traverses the co-authors graph
+/// @brief traverses the coauthor graph
 ////////////////////////////////////////////////////////////////////////////////
 
-function traverse1 (graph, start, depth, maxlen) {
-  var genVertex = function(vertex) {
-    return { name: vertex.getProperty("name") };
+function coauthorTraverse (graph, start, depth, maxlen) {
+  var config = {
+    datasource: traversal.collectionDatasourceFactory(graph._edges),
+    strategy: Traverser.BREADTH_FIRST,
+    expander: traversal.anyExpander,
+    filter: traversal.maxDepthFilter,
+    maxDepth: depth,
+    uniqueness: { edges: Traverser.UNIQUE_GLOBAL, vertices: Traverser.UNIQUE_NONE },
+    visitor: coauthorVisitor(maxlen)
   };
 
-  var genEdge = function(from, to, edge) {
-    return {
-      from: from,
-      to: to,
-      year: edge.getProperty("year"),
-      count: edge.getProperty("count")
-    };
-  };
+  var traverser = new Traverser(config);
 
-  return traverse(graph, start, depth, maxlen, genVertex, genEdge);
+  var result = { positions: {}, vertices: [], links: [], minYear: 0, maxYear: 0 };
+  var first = graph._vertices.firstExample({ name: start });
+
+  if (first !== null) {
+    traverser.traverse(result, first);
+  }
+
+  return {
+    start: start,
+    depth: depth,
+    minYear: result.minYear,
+    maxYear: result.maxYear,
+    vertices: result.vertices,
+    links: result.links };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief coauthor visitor
+////////////////////////////////////////////////////////////////////////////////
+
+function dblpVisitor (maxlen) {
+  return function (config, result, vertex, path) {
+    var key = vertex._key;
+    var len = path.vertices.length;
+    var pos;
+
+    if (result.positions.hasOwnProperty(key)) {
+      pos = result.positions[key];
+    }
+    else {
+      pos = result.vertices.length;
+
+      if (maxlen <= pos) {
+	return;
+      }
+
+      result.positions[key] = pos;
+
+      if (vertex.type === "person") {
+	result.vertices.push({
+	  type: vertex.type,
+	  key: key,
+	  text: vertex.name,
+	  depth: len - 1
+	});
+      }
+      else {
+	result.vertices.push({
+	  type: vertex.type,
+	  key: key,
+	  text: vertex.title,
+	  depth: len - 1
+	});
+      }
+    }
+
+    if (1 < len) {
+      var peer = path.vertices[len - 2];
+      var pkey = peer._key;
+
+      if (result.positions.hasOwnProperty(pkey)) {
+	var edge = path.edges[len - 2];
+	var ppos = result.positions[pkey];
+
+	result.links.push({ source: pos, target: ppos, type: edge.$label });
+      }
+    }
+  };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief traverses the dblp graph
 ////////////////////////////////////////////////////////////////////////////////
 
-function traverse2 (graph, start, depth, maxlen) {
-  var genVertex = function(vertex) {
-    return vertex.properties();
+function dblpTraverse (graph, start, depth, maxlen) {
+  var config = {
+    datasource: traversal.collectionDatasourceFactory(graph._edges),
+    strategy: Traverser.DEPTH_FIRST,
+    expander: traversal.anyExpander,
+    filter: traversal.maxDepthFilter,
+    maxDepth: depth,
+    uniqueness: { edges: Traverser.UNIQUE_GLOBAL, vertices: Traverser.UNIQUE_NONE },
+    visitor: dblpVisitor(maxlen)
   };
 
-  var genEdge = function(from, to, edge) {
-    return {
-      from: from,
-      to: to,
-      type: edge.getLabel(),
-      year: edge.getProperty("year")
-    };
-  };
+  var traverser = new Traverser(config);
 
-  return traverse(graph, start, depth, maxlen, genVertex, genEdge);
+  var result = { positions: {}, vertices: [], links: [], minYear: 0, maxYear: 0 };
+  var first = graph._vertices.document(start);
+
+  if (first !== null) {
+    traverser.traverse(result, first);
+  }
+
+  return {
+    start: start,
+    depth: depth,
+    vertices: result.vertices,
+    links: result.links };
 }
 
 // -----------------------------------------------------------------------------
@@ -164,6 +192,7 @@ function traverse2 (graph, start, depth, maxlen) {
 /// - start: The name of the start author.
 /// - depth: The depth of the tree walk. Note that there is a cut at a 1000
 ///          nodes.
+/// - maxlen: maximal number of vertices to return.
 /// - vertices: The list of vertices. A vertex has one attribute, the name of
 ///             the author.
 /// - links: The coauthor relation. A link has the attributes `from`, `to`,
@@ -172,15 +201,19 @@ function traverse2 (graph, start, depth, maxlen) {
 
 exports.coauthor = function (req, res) {
   var gname = req.parameters.graph || "coauthor";
-  var sname = req.start;
+  var sname = req.parameters.start;
   var depth = 2;
   var start;
   var graph;
   var result;
   var maxlen = 200;
 
-  if (req.hasOwnProperty("depth")) {
+  if (req.parameters.hasOwnProperty("depth")) {
     depth = parseInt(req.parameters.depth,10);
+  }
+
+  if (req.parameters.hasOwnProperty("maxlen")) {
+    maxlen = parseInt(req.parameters.maxlen,10);
   }
 
   // get the underlying graph
@@ -200,19 +233,14 @@ exports.coauthor = function (req, res) {
       a = graph._vertices.any();
     }
 
-    start = graph.getVertex(a._id);
+    start = a.name;
   }
   else {
-    start = graph.getVertex(sname);
-  }
-
-  if (start === null) {
-    actions.resultNotFound(req, res, actions.HTTP_NOT_FOUND, "name not found");
-    return;
+    start = sname;
   }
 
   // traverse
-  result = traverse1(graph, start, depth, maxlen);
+  result = coauthorTraverse(graph, start, depth, maxlen);
 
   // and return
   actions.resultOk(req, res, actions.HTTP_OK, result);
@@ -240,7 +268,7 @@ exports.coauthor = function (req, res) {
 ///   "_rev" : "688430067001", 
 ///   "_key" : "688430067001", 
 ///   "type" : "person", 
-///   "name" : "John Boates" 
+///   "text" : "John Boates" 
 /// }
 /// @endcode
 ///
@@ -254,23 +282,26 @@ exports.coauthor = function (req, res) {
 ///   "_key" : "journals::dc::HieronsMN12",
 ///   "year" : 2012,
 ///   "type" : "article",
-///   "title" : "Implementation ... distributed interfaces."
+///   "text" : "Implementation relations and test generation for systems with distributed interfaces."
 /// }
 /// @endcode
 ////////////////////////////////////////////////////////////////////////////////
 
 exports.dblp = function (req, res) {
-  var a;
   var gname = req.parameters.graph || "dblp";
-  var sname = req.start;
-  var depth = 2;
+  var sname = req.parameters.start;
+  var depth = 3;
   var start;
   var graph;
   var result;
-  var maxlen = 1000;
+  var maxlen = 200;
 
-  if (req.hasOwnProperty("depth")) {
+  if (req.parameters.hasOwnProperty("depth")) {
     depth = parseInt(req.parameters.depth,10);
+  }
+
+  if (req.parameters.hasOwnProperty("maxlen")) {
+    maxlen = parseInt(req.parameters.maxlen,10);
   }
 
   // get the underlying graph
@@ -284,28 +315,14 @@ exports.dblp = function (req, res) {
 
   // get the start vertex
   if (sname === "" || sname === undefined) {
-    a = graph._vertices.any();
-    start = graph.getVertex(a._id);
+    start = graph._vertices.any()._key;
   }
   else {
-    start = graph.getVertex(sname);
-
-    if (start === null) {
-      a = graph._vertices.byExample({ name: sname });
-
-      if (a !== null) {
-        start = graph.getVertex(a._id);
-      }
-    }
-  }
-
-  if (start === null) {
-    actions.resultNotFound(req, res, actions.HTTP_NOT_FOUND, "name not found");
-    return;
+    start = sname;
   }
 
   // traverse
-  result = traverse2(graph, start, depth, maxlen);
+  result = dblpTraverse(graph, start, depth, maxlen);
 
   // and return
   actions.resultOk(req, res, actions.HTTP_OK, result);

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+.label {
+  fill: #777;
+}
+
+.node-force {
+  stroke: #000; 
+  stroke-width: 1.5px;
+}
+
+.link-force {
+  stroke: #999;
+  stroke-opacity: .6;
+}
+
+.button {
+  text-align: center;
+  color: white;
+  background: gray;
+  border-color: black;
+  border-style: solid;
+  border-width: 1px;
+  padding: 2px;
+  width:350px;
+  cursor: pointer;
+  display: inline;
+}  
+
+#titletext {
+  text-align: center;
+  width: 900px;
+  padding-top: 20px;
+}
+
+svg {
+  width: 960px;
+  height: 700px;
+}
+
+.nav {
+  height: 22px;
+  width: 962px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+div#view {
+  width: 960px;
+  height: 700px;
+  border-color: #aaa;
+  border-style: solid;
+  border-width: 1px;
+}
+</style>
+</head>
+<body>
+  <div id="view"></div>
+  <div id="titletext"></div> 
+<script src="jquery-1.5.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<script>
+var config = {
+  width: 960,
+  height: 700,
+  animationSpeed: 1500,
+  layout: "force",  
+  maxCount: 100
+};
+
+function DBLPDiag (config) {
+  var that = this;
+
+  this.svg = d3.select("#view")
+    .append("svg")
+    .attr("width", config.width)
+    .attr("height", config.height);
+
+  this.textGroup = this.svg.append("svg:g");
+  this.linkGroup = this.svg.append("svg:g");
+  this.nodeGroup = this.svg.append("svg:g");
+
+  this.maxCount = config.maxCount;
+}
+
+
+
+DBLPDiag.prototype.nodeColor = function (node) {
+  switch (node.type) {
+    case "person": return "#ff0000";
+    case "article": return "#00ff00";
+    case "inproceedings": return "#008800";
+    case "proceedings": return "#0000ff";
+  }
+
+  return "#555555";
+};
+
+
+
+DBLPDiag.prototype.linkColor = function (link) {
+  switch (link.type) {
+    case "author": return "#ff0000";
+    case "proceedings": return "#0000ff";
+    case "editor": return "#00ff00";
+    case "publisher": return "#008800";
+  }
+
+  return "#000000";
+};
+
+
+
+DBLPDiag.prototype.onTick = function () {
+  this.node
+    .attr("cx", function(d) { return d.x; })
+    .attr("cy", function(d) { return d.y; });
+
+  this.link
+    .attr("x1", function(d) { return d.source.x; })
+    .attr("y1", function(d) { return d.source.y; })
+    .attr("x2", function(d) { return d.target.x; })
+    .attr("y2", function(d) { return d.target.y; });
+};
+
+
+
+DBLPDiag.prototype.loadGraph = function (name) {
+  var that = this;
+  var url = "/fosdem/dblp.json?depth=4&maxlen=" + config.maxCount;
+
+  if (name) {
+    url += "&start=" + encodeURIComponent(name);
+  }
+
+  d3.json(url, function(graph) {
+    that.setGraph(graph);
+    that.setupNodes();
+    that.addLinks();
+  });
+};
+
+
+
+DBLPDiag.prototype.updateTitle = function () {
+  var text = this.graph.vertices[0].text;
+
+  $("div#titletext").text(text);
+};
+
+
+
+DBLPDiag.prototype.setGraph = function (graph) {
+  this.graph = graph;
+  this.vertices = graph.vertices;
+  this.links = graph.links;
+
+  this.updateTitle();
+};
+
+
+
+DBLPDiag.prototype.setupNodes = function () {
+  var that = this;
+
+  this.year = 0;
+
+  this.nodeGroup.selectAll("circle").remove();
+  this.linkGroup.selectAll("line").remove();
+
+  if (this.force !== undefined) {
+    this.force.stop();
+  }
+
+  this.force = d3.layout.force()
+    .charge(-200)
+    .linkDistance(80)
+    .size([config.width, config.height]);
+
+  // create vertices nodes
+  this.node = this.nodeGroup.selectAll("circle")
+    .data(that.vertices)
+    .enter()
+    .append("circle")
+    .attr("class", "node-force")
+    .attr("r", 5)
+    .style("fill", function(node) { return that.nodeColor(node); })
+    .call(app.force.drag);
+
+  // append name to node
+  this.node
+    .append("title")
+    .text(function(d) { return d.text; });
+
+  // switch to new start node on click
+  this.node
+    .on("click", function(d) { that.loadGraph(d.key); })
+
+  // add no links
+  this.link = this.linkGroup.selectAll("line");
+
+  this.force
+    .on("tick", function() { that.onTick(); })
+    .nodes(that.vertices)
+    .start();
+};
+
+
+
+DBLPDiag.prototype.addLinks = function () {
+  var that = this;
+
+  this.force
+    .stop();
+
+  this.linkGroup.selectAll("line").remove();
+
+  this.link = this.linkGroup.selectAll("line")
+    .data(that.links)
+    .enter()
+    .append("line")
+    .attr("class", "link-force")
+    .style("stroke-width", 1.5)
+    .style("stroke", function(link) { return that.linkColor(link); });
+
+  this.force
+    .links(that.links)
+    .start();
+
+  this.updateTitle();
+};
+
+
+
+var app = new DBLPDiag(config);
+    
+app.loadGraph();
+</script>
+</body>
+</html>

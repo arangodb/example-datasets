@@ -248,7 +248,7 @@ function main (args) {
 
         edg.save(article._id, proceeding._id, {
           '$label': "proceedings", 
-          type: proceeding.type
+          year: year
         });
       }
       catch (err1) {
