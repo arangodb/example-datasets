@@ -45,19 +45,17 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
   miyear = 0;
   mayear = 0;
 
-  while (d < depth && 0 < newVertices.length && vertices.length < maxlen) {
+  while (d < depth + 1 && 0 < newVertices.length) {
     var children = [];
 
-    d++;
-
-    for (i = 0;  i < newVertices.length && vertices.length < maxlen;  ++i) {
+    for (i = 0;  i < newVertices.length;  ++i) {
       var next = newVertices[i];
       var nnum = seen[next.getId()];
       var peers;
 
       edges = next.getEdges();
 
-      for (j = 0;  j < edges.length && vertices.length < maxlen;  ++j) {
+      for (j = 0;  j < edges.length;  ++j) {
         var edge = edges[j];
         var peer = edge.getPeerVertex(next);
         var pid = peer.getId();
@@ -68,12 +66,16 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
           num = seen[pid];
         }
         else {
-          num = seen[pid] = vertices.length;
-          vertices.push(peer);
-          children.push(peer);
+	  if (vertices.length < maxlen) {
+            num = seen[pid] = vertices.length;
+            vertices.push(peer);
+            children.push(peer);
+	  }
         }
 
-        links.push(genEdge(nnum, num, edge));
+	if (num !== undefined) {
+          links.push(genEdge(nnum, num, edge));
+	}
 
         year = edge.getProperty("year");
 
@@ -89,7 +91,11 @@ function traverse (graph, start, depth, maxlen, genVertex, genEdge) {
       }
     }
 
-    newVertices = children;
+    if (d < depth) {
+      newVertices = children;
+    }
+
+    d++;
   }
 
   return {
@@ -171,7 +177,7 @@ exports.coauthor = function (req, res) {
   var start;
   var graph;
   var result;
-  var maxlen = 1000;
+  var maxlen = 200;
 
   if (req.hasOwnProperty("depth")) {
     depth = parseInt(req.parameters.depth,10);
@@ -248,12 +254,13 @@ exports.coauthor = function (req, res) {
 ///   "_key" : "journals::dc::HieronsMN12",
 ///   "year" : 2012,
 ///   "type" : "article",
-///   "title" : "Implementation relations and test generation for systems with distributed interfaces."
+///   "title" : "Implementation ... distributed interfaces."
 /// }
 /// @endcode
 ////////////////////////////////////////////////////////////////////////////////
 
 exports.dblp = function (req, res) {
+  var a;
   var gname = req.parameters.graph || "dblp";
   var sname = req.start;
   var depth = 2;
@@ -277,14 +284,14 @@ exports.dblp = function (req, res) {
 
   // get the start vertex
   if (sname === "" || sname === undefined) {
-    var a = graph._vertices.any();
+    a = graph._vertices.any();
     start = graph.getVertex(a._id);
   }
   else {
     start = graph.getVertex(sname);
 
     if (start === null) {
-      var a = graph._vertices.byExample({ name: sname });
+      a = graph._vertices.byExample({ name: sname });
 
       if (a !== null) {
         start = graph.getVertex(a._id);

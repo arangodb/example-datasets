@@ -1,7 +1,8 @@
 #!/bin/bash
 
-ARANGOIMP="arangoimp"
-ARANGOSH="arangosh"
+BASE="/tmp/demo/bin/"
+ARANGOIMP="${BASE}arangoimp"
+ARANGOSH="${BASE}arangosh"
 
 while [ 0 -lt "$#" ];  do
   case "$1" in
