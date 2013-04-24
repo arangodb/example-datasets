@@ -4,12 +4,14 @@
 var arangodb = require("org/arangodb");
 var printf = require("internal").printf;
 
-function main (argv) {
+function main (args) {
   var addBook;
   var addPerson;
+  var argv;
   var edg;
   var extractYear;
   var filterYear;
+  var i;
   var inc;
   var iterator;
   var noBooks;
@@ -18,8 +20,19 @@ function main (argv) {
   var out;
   var peopleAttributes;
 
+  if (arguments.length === 1) {
+    argv = args;
+  }
+  else {
+    argv = ["main"];
+
+    for (i = 0;  i < arguments.length;  ++i) {
+      argv.push(arguments[i]);
+    }
+  }
+
   if (argv.length !== 4) {
-    printf("usage: create-persons <dblp> <graph> <relation>\n");
+    printf("usage: create-graph <dblp> <vertices> <edges>\n");
     return;
   }
 
@@ -38,7 +51,7 @@ function main (argv) {
     out = arangodb.db._createDocumentCollection(argv[2]);
   }
 
-  out.ensureUniqueConstraint("type", "$id");
+  out.ensureUniqueConstraint("name");
 
   // check the output collection for relationship
   edg = arangodb.db._collection(argv[3]);
@@ -52,14 +65,15 @@ function main (argv) {
   // .........................................................................
 
   addPerson = function (person) {
-    var found = out.firstExample({ type: "person", '$id': person });
+    var found = out.firstExample({ name: person });
 
     if (found === null) {
       noPersons++;
       printf("%d person: %s\n", noPersons, person);
+
       found = out.save({
-	type: "person",
-	'$id': person
+        type: "person",
+        name: person
       });
     }
 
@@ -71,16 +85,20 @@ function main (argv) {
   // .........................................................................
 
   addBook = function (type, key, book, year) {
-    var found = out.firstExample({ type: type, '$id': key });
+    var found;
 
-    if (found === null) {
+    try {
+      found = out.document(key);
+    }
+    catch (err) {
       noBooks++;
       printf("%d %s: %s\n", noBooks, type, book);
+
       found = out.save({ 
-	type: type, 
-	'$id': key, 
-	title: book,
-	year: year
+        type: type, 
+        _key: key, 
+        title: book,
+        year: year
       });
     }
 
@@ -97,18 +115,17 @@ function main (argv) {
   extractYear = function (d) {
     if (d.hasOwnProperty("year")) {
       if (d.year instanceof Array && 0 < d.year.length) {
-	return Math.min.apply(Math.min, d.year.map(Number));
+        return Math.min.apply(Math.min, d.year.map(Number));
       }
-      else {
-	return Number(d.year);
-      }
+
+      return Number(d.year);
     }
 
     return null;
   };
 
   filterYear = function(year) {
-    return year === 2007;
+    return year < 2005;
   };
 
   iterator = function (d, pos) {
@@ -117,6 +134,7 @@ function main (argv) {
     var i;
     var j;
     var year;
+    var name;
 
     if ((pos + 1) % 1000 === 0) {
       printf("processing article %d\n", pos + 1);
@@ -136,33 +154,42 @@ function main (argv) {
       return;
     }
 
-    book = addBook(type, d.key, d.title, year);
+    book = addBook(type, d._key, d.title, year);
 
     // create all edges
     for (i = 0;  i < peopleAttributes.length;  ++i) {
       var key = peopleAttributes[i];
 
       if (d.hasOwnProperty(key)) {
-	var val = d[key];
-	var person;
+        var val = d[key];
+        var person;
 
-	if (val instanceof Array) {
-	  for (j = 0;  j < val.length;  ++j) {
-	    person = addPerson(val[j]);
-	    edg.save(book._id, person._id, {
-	      '$label': key,
-	      year: year
-	    });
+        if (val instanceof Array) {
+          for (j = 0;  j < val.length;  ++j) {
+            name = val[j];
 
-	  }
-	}
-	else {
-	  person = addPerson(val);
-	  edg.save(book._id, person._id, {
-	    '$label': key,
-	    year: year
-	  });
-	}
+            person = addPerson(name);
+
+            if (person !== null) {
+              edg.save(book._id, person._id, {
+                '$label': key,
+                year: year
+              });
+            }
+          }
+        }
+        else {
+          name = val;
+
+          person = addPerson(name);
+
+          if (person !== null) {
+            edg.save(book._id, person._id, {
+              '$label': key,
+              year: year
+            });
+          }
+        }
       }
     }
   };
@@ -178,9 +205,10 @@ function main (argv) {
 
   iterator = function (d, pos) {
     var type;
-    var book;
+    var article;
     var proceeding;
     var i;
+    var year;
 
     if ((pos + 1) % 1000 === 0) {
       printf("processing article %d\n", pos + 1);
@@ -200,22 +228,31 @@ function main (argv) {
       return;
     }
 
-    // find the proceedings
-    book = out.firstExample({ type: type, '$id': d.key });
-
-    if (book === null) {
+    // find the article
+    try {
+      article = out.document(d._key);
+    }
+    catch (err) {
+      printf("cannot find article %s\n", d._key);
       return;
     }
 
     for (i = 0;  i < d.crossref.length;  ++i) {
       var cr = d.crossref[i];
 
-      proceeding = out.firstExample({ type: "proceedings", '$id': cr });
+      try {
+        proceeding = out.document(cr);
 
-      if (proceeding !== null) {
-	noProceedings++;
-	printf("%d: %s in %s\n", noProceedings, book.title, proceeding.title);
-	edg.save(book._id, proceeding._id, { '$label': "proceedings" });
+        noProceedings++;
+        printf("%d: %s in %s\n", noProceedings, article.title, proceeding.title);
+
+        edg.save(article._id, proceeding._id, {
+          '$label': "proceedings", 
+          year: year
+        });
+      }
+      catch (err1) {
+        printf("crossref '%s' failed: %s\n", cr, String(err1));
       }
     }
   };
