@@ -4,11 +4,13 @@ arangoimp --type json --collection dblp --create-collection yes dblp.json
 
 arangod --console:
 
-var internal = require("internal");
-var a = internal.read("../ArangoDB-Data/DBLP/create-graph.js");
-var b = {require:require}; internal.execute(a, b, "");
-b.main("dblp","dblp_vertices","dblp_edges")
-
-var a = internal.read("../ArangoDB-Data/DBLP/create-coauthor-graph.js");
-var b = {require:require}; internal.execute(a, b, "");
-b.main("dblp_vertices", "dblp_edges", "dblp_coauthor")
+    var internal = require("internal");
+    var fs = require("fs");
+    
+    var a = fs.read("../ArangoDB-Data/DBLP/create-graph.js");
+    a += "main(\"dblp\", \"dblp_vertices\", \"dblp_edges\");"
+    internal.executeScript(a, null, "create-graph")
+    
+    var b = fs.read("../ArangoDB-Data/DBLP/create-coauthor-graph.js");
+    b += "main(\"dblp_vertices\", \"dblp_edges\", \"dblp_coauthor\");"
+    internal.executeScript(b, null, "create-coauthor-graph")
