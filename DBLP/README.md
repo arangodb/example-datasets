@@ -1,8 +1,10 @@
+```Bash
 ./dblp-download.sh
 python dblp2json.py dblp.xml > dblp.json
 arangoimp --type json --collection dblp --create-collection yes dblp.json
 
 arangod --console:
+```
 
 ```javascript
 var internal = require("internal");
