@@ -188,12 +188,16 @@ Most of the flights are starting from Cologne Airport (CGN).
 
 In order to import this data use
   
-  arangorestore --input-directory "<path-to>/AirlineCompany"
+```
+  unix> arangorestore --input-directory "<path-to>/AirlineCompany"
+```
 
 If you want to create a graph for this data use
 
-  arangosh
+```
+  unix> arangosh
   arangosh> var Graph = require("org/arangodb/graph").Graph;
   arangosh> new Graph("Airline", "airports", "flights");
+```
 
 This dataset has been used for the [demo of the graph visualisation tool](http://www.arangodb.org/2013/09/30/new-graph-visualisation)
