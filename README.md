@@ -211,4 +211,4 @@ In order to import this data execute the following command:
 ```Bash
   unix> cat import.js | arangosh
 ```
-
+This dataset has been used for the [screencast of the graph visualisation tool](https://www.arangodb.org/2013/11/29/visualize-graphs-screencast).
