@@ -180,7 +180,7 @@ this will create an XML file dblp.xml (roughly 1.1 GByte).
 converts the file to json
 
 
-Graps Airline Company
+Graphs Airline Company
 =====================
 
 The Graphs/AirlineCompany directory contains a subset of the Airports and flight routes of an imaginary airline company among them.
@@ -201,3 +201,14 @@ If you want to create a graph for this data use
 ```
 
 This dataset has been used for the [demo of the graph visualisation tool](http://www.arangodb.org/2013/09/30/new-graph-visualisation)
+
+Graphs IMDB
+====================
+
+The Graphs/IMDB contains a dataset taken form IMDB http://www.imdb.com.
+
+In order to import this data execute the following command:
+```Bash
+  unix> cat import.js | arangosh
+```
+
