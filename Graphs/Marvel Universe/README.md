@@ -12,7 +12,7 @@ These will be overwritten by the importer.
 To import the data execute the following on your bash:
 
 ```Bash
- unix> cat import.js | arangosh
+ unix> ./import.sh
 ```
 
 You will then have the following two collections:
