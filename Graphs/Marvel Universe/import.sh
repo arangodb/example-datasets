@@ -1,6 +1,6 @@
 #!/bin/bash
 
-arangosh --quiet <<EOF
+${ARANGODB_BIN}arangosh --quiet <<EOF
   var db = require("org/arangodb").db;
   var Graph = require("org/arangodb/graph").Graph;
 
@@ -11,4 +11,4 @@ arangosh --quiet <<EOF
   new Graph("marvel_heros", "marvel_vertices", "marvel_edges"); 
 EOF
 
-arangorestore dump
+${ARANGODB_BIN}arangorestore dump
