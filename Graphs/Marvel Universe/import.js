@@ -59,5 +59,5 @@
   verticesCollection.ensureFulltextIndex("realName", 3);
   verticesCollection.ensureFulltextIndex("name", 3);
 
-  internal.processCsvFile("source.csv", storeEdge);
+  internal.processCsvFile("hero-comic-network.csv", storeEdge);
 }());

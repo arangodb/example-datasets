@@ -1,0 +1,1 @@
+{"parameters":{"version":4,"type":2,"cid":"49103271","deleted":false,"doCompact":true,"maximalSize":33554432,"name":"marvel_vertices","isVolatile":false,"waitForSync":false},"indexes":[{"id":"51331495","type":"fulltext","unique":false,"minLength":3,"fields":["realName"]},{"id":"51528103","type":"fulltext","unique":false,"minLength":3,"fields":["name"]}]}
