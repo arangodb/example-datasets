@@ -26,10 +26,5 @@ the source file `hero-comic-network.csv`, you can use
 
 ```Bash
  unix> cat import.js | arangosh
-```
-
-and update the dump files using
-
-```Bash
-  unix> arangodump --collection marvel_edges --collection marvel_vertices
+ unix> arangodump --collection marvel_edges --collection marvel_vertices
 ```
