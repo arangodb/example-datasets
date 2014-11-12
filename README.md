@@ -200,8 +200,6 @@ If you want to create a graph for this data use
   arangosh> new Graph("Airline", "airports", "flights");
 ```
 
-This dataset has been used for the [demo of the graph visualisation tool](http://www.arangodb.org/2013/09/30/new-graph-visualisation)
-
 Graphs IMDB
 ====================
 
@@ -211,4 +209,4 @@ In order to import this data execute the following command:
 ```Bash
   unix> cat import.js | arangosh
 ```
-This dataset has been used for the [screencast of the graph visualisation tool](https://www.arangodb.org/2013/11/29/visualize-graphs-screencast).
+This dataset has been used for the [screencast of the graph visualisation tool](https://www.arangodb.com/2013/11/29/visualize-graphs-screencast).
