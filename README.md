@@ -1,7 +1,7 @@
 Fake user data
 ==============
 
-The "RandumUsers" directory contains files with random users.
+The "RandomUsers" directory contains files with random users.
 
     {
       "name": {
@@ -207,6 +207,7 @@ The Graphs/IMDB contains a dataset taken form IMDB http://www.imdb.com.
 
 In order to import this data execute the following command:
 ```Bash
-  unix> cat import.js | arangosh
+  unix> arangosh
+  arangosh> require("internal").load("Graphs/IMDB/import.js");
 ```
 This dataset has been used for the [screencast of the graph visualisation tool](https://www.arangodb.com/2013/11/29/visualize-graphs-screencast).
