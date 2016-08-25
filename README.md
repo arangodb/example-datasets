@@ -2,6 +2,7 @@ ArangoDB Example graph data
 ===========================
 This repository contains [datasets organized in graphs to be used with the ArangoDB Graph database](https://github.com/arangodb/arangodb).
 
+[Read more about ArangoDB and graphs here.](https://docs.arangodb.com/latest/Manual/Graphs)
 Fake user data
 ==============
 
