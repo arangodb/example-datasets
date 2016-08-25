@@ -1,3 +1,7 @@
+ArangoDB Example graph data
+===========================
+This repository contains [datasets organized in graphs to be used with the ArangoDB Graph database](https://github.com/arangodb/arangodb).
+
 Fake user data
 ==============
 
@@ -211,3 +215,25 @@ In order to import this data execute the following command:
   arangosh> require("internal").load("Graphs/IMDB/import.js");
 ```
 This dataset has been used for the [screencast of the graph visualisation tool](https://www.arangodb.com/2013/11/29/visualize-graphs-screencast).
+
+
+Debian Dependency Graph
+========================
+The [debian linux distribution](http://debian.org) consists of packages, which relate to each others by dependencies, which demand or recommend other packages to be installed.
+Also conflicts are a possible relation, which prohibits two packages at once.
+The script used to [gather this graph data is available alongside with pyarango](https://github.com/tariqdaouda/pyArango/blob/master/examples/debiangraph.py).
+However, it takes a while to translate the debian package database into arangodb documents, so here a dump of Debian Jessie.
+
+Since this is a dump of a complete database, you can use [`arangorestore`](https://docs.arangodb.com/3.0/Manual/Administration/Arangorestore.html) to import this. We will create an own database "debianGraph" so it doesn't interfere with your existing data:
+
+
+```
+unix> arangorestore --input-directory DebianDependencyGraph/ \
+    --create-collection true \
+    --include-system-collections true \
+    --create-database true \
+    --server.database debianGraph
+```
+
+Using the ArangoDB 3.1 graph viewer, we can browse random starting points in the graph:
+![graph screenshot](DebianDependencyGraph/debian_dependency_graph.png)
