@@ -220,11 +220,11 @@ This dataset has been used for the [screencast of the graph visualisation tool](
 Debian Dependency Graph
 ========================
 The [debian linux distribution](http://debian.org) consists of packages, which relate to each others by dependencies, which demand or recommend other packages to be installed.
-Also conflicts are a possible relation, which prohibits two packages at once.
+Also conflicts are a possible relation, which prohibits two packages to be installed at once.
 The script used to [gather this graph data is available alongside with pyarango](https://github.com/tariqdaouda/pyArango/blob/master/examples/debiangraph.py).
-However, it takes a while to translate the debian package database into arangodb documents, so here a dump of Debian Jessie.
+However, it takes a while to translate the debian package database into arangodb documents, so here is a dump of the Debian Jessie package database.
 
-Since this is a dump of a complete database, you can use [`arangorestore`](https://docs.arangodb.com/3.0/Manual/Administration/Arangorestore.html) to import this. We will create an own database "debianGraph" so it doesn't interfere with your existing data:
+Since this is a dump of a complete database, you can use [`arangorestore`](https://docs.arangodb.com/3.0/Manual/Administration/Arangorestore.html) to import this. We will create an own database `debianGraph` so it doesn't interfere with your existing data:
 
 
 ```
