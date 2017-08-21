@@ -236,5 +236,5 @@ unix> arangorestore --input-directory DebianDependencyGraph/ \
     --server.database debianGraph
 ```
 
-Using the upcomming [ArangoDB 3.1 graph viewer](https://github.com/arangodb/arangodb), we can browse random starting points in the graph:
+Using the [ArangoDB graph viewer](https://github.com/arangodb/arangodb), we can browse random starting points in the graph:
 ![graph screenshot](DebianDependencyGraph/debian_dependency_graph.png)
