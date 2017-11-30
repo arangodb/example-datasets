@@ -1,8 +1,10 @@
 ArangoDB Example graph data
 ===========================
+
 This repository contains [datasets organized in graphs to be used with the ArangoDB Graph database](https://github.com/arangodb/arangodb).
 
-[Read more about ArangoDB and graphs here.](https://docs.arangodb.com/latest/Manual/Graphs)
+More about ArangoDB and graphs: [Graph documentation](https://docs.arangodb.com/latest/Manual/Graphs)
+
 Fake user data
 ==============
 
@@ -220,6 +222,7 @@ This dataset has been used for the [screencast of the graph visualisation tool](
 
 Debian Dependency Graph
 ========================
+
 The [debian linux distribution](http://debian.org) consists of packages, which relate to each others by dependencies, which demand or recommend other packages to be installed.
 Also conflicts are a possible relation, which prohibits two packages to be installed at once.
 The script used to [gather this graph data is available alongside with pyarango](https://github.com/tariqdaouda/pyArango/blob/master/examples/debiangraph.py).
@@ -238,3 +241,9 @@ unix> arangorestore --input-directory DebianDependencyGraph/ \
 
 Using the [ArangoDB graph viewer](https://github.com/arangodb/arangodb), we can browse random starting points in the graph:
 ![graph screenshot](DebianDependencyGraph/debian_dependency_graph.png)
+
+Game of Thrones
+===============
+
+Small, multi-purpose dataset including a small graph of parents and children (`Characters --ChildOf--> Characters`).
+See [README](GameOfThrones/README.md) for details.

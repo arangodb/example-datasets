@@ -1,0 +1,10 @@
+[
+    { "name": "Dragonstone", "coordinate": [ 55.167801, -6.815096 ] },
+    { "name": "King's Landing", "coordinate": [ 42.639752, 18.110189 ] },
+    { "name": "The Red Keep", "coordinate": [ 35.896447, 14.446442 ] },
+    { "name": "Yunkai", "coordinate": [ 31.046642, -7.129532 ] },
+    { "name": "Astapor", "coordinate": [ 31.50974, -9.774249 ] },
+    { "name": "Winterfell", "coordinate": [ 54.368321, -5.581312 ] },
+    { "name": "Vaes Dothrak", "coordinate": [ 54.16776, -6.096125 ] },
+    { "name": "Beyond the wall", "coordinate": [ 64.265473, -21.094093 ] }
+]
