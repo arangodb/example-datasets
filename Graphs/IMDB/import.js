@@ -7,15 +7,18 @@ var fs=require("fs");
   var vName = "imdb_vertices";
   var eName = "imdb_edges";
   var gName = "imdb";
-  var Graph = require("org/arangodb/graph").Graph;
+  var gm = require('@arangodb/general-graph');
   var g;
   try {
-    g = new Graph(gName);
+    g = gm._create(gName);
     g.drop();
   } catch (e) {
 
   }
-  g = new Graph(gName, vName, eName);
+  g = gm._create(gName);
+  g._addVertexCollection(vName);
+  var rel = gm._relation(eName, vName, vName);
+  g._extendEdgeDefinitions(rel);
   var genres = {};
   
   var toKey = function(d) {
