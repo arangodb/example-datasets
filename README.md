@@ -1,3 +1,6 @@
+**Note: this repository is very big (> 1 GB). Cloning it will take a while and require a lot of disk space.**
+
+
 ArangoDB Example graph data
 ===========================
 
