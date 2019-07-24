@@ -6,7 +6,7 @@ ARANGOSH_PARAM="--server.password ''"
 
 ### Older versions
 #BASE="/tmp/demo/bin/"
-#SHPARAM="-s"
+#ARANGOSH_PARAM="-s"
 
 ARANGOIMP="${BASE}arangoimp"
 ARANGOSH="${BASE}arangosh ${ARANGOSH_PARAM}"
