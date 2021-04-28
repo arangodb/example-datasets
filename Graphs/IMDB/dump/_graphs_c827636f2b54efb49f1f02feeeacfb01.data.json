@@ -1,0 +1,1 @@
+{"type":2300,"data":{"_key":"imdb","_id":"_graphs/imdb","_rev":"_cPlZM_e---","edgeDefinitions":[{"collection":"imdb_edges","from":["imdb_vertices"],"to":["imdb_vertices"]}],"orphanCollections":[]}}
