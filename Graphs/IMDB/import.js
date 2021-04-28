@@ -72,6 +72,6 @@ var fs=require("fs");
   //verticesCollection.ensureFulltextIndex("name", 3);
   //verticesCollection.ensureFulltextIndex("birthplace", 3);
 
-  internal.processJsonFile(fs.join(__dirname, "nodes.json"), storeVertex);
-  internal.processJsonFile(fs.join(__dirname, "edges.json"), storeEdge);
+  internal.processJsonFile(fs.join(__dirname, "nodes.jsonl"), storeVertex);
+  internal.processJsonFile(fs.join(__dirname, "edges.jsonl"), storeEdge);
 }());
