@@ -250,3 +250,10 @@ Game of Thrones
 
 Small, multi-purpose dataset including a small graph of parents and children (`Characters --ChildOf--> Characters`).
 See [README](GameOfThrones/README.md) for details.
+
+Amazon Meta
+===========
+
+Amazon product co-purchasing network metadata (summer 2006) with product
+metadata for over half a million different products from different categories:
+<https://snap.stanford.edu/data/amazon-meta.html>
